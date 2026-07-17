@@ -82,7 +82,19 @@ def display_employee_tables(cursor):
         display_table(cursor, "employee", "EMPLOYEE TABLE")
         display_table(cursor, "employee_time", "EMPLOYEE TIME TABLE")
 
+def display_supplier_inventory_tables(cursor):
+    """
+    Displays the supplier and inventory-related tables.
+    """
 
+    display_table(cursor, "supplier", "SUPPLIER TABLE")
+    display_table(cursor, "inventory_item", "INVENTORY ITEM TABLE")
+    display_table(cursor, "supplier_delivery", "SUPPLIER DELIVERY TABLE")
+    display_table(
+        cursor,
+        "supplier_delivery_item",
+        "SUPPLIER DELIVERY ITEM TABLE"
+    )
 def main():
     """
     Controls the main program and manages the database
@@ -104,6 +116,8 @@ def main():
 
         # Display the employee-related tables
         display_employee_tables(cursor)
+        # Display the supplier and inventory-related tables
+        display_supplier_inventory_tables(cursor)
 
     except Error as error:
         print(f"\nUnable to connect to the MySQL database.")
