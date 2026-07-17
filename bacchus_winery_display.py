@@ -40,6 +40,47 @@ def create_database_connection():
         print("Successfully connected to the Bacchus Winery database.")
 
     return connection
+def display_table(cursor, table_name, display_title):
+    """
+    Displays all records from a database table.
+    """
+
+    cursor.execute(f"SELECT * FROM {table_name}")
+    rows = cursor.fetchall()
+
+    column_names = [column[0] for column in cursor.description]
+
+    print("\n" + "=" * 80)
+    print(display_title)
+    print("=" * 80)
+
+    print(" | ".join(column_names))
+    print("-" * 80)
+
+    if not rows:
+        print("No records found.")
+    else:
+        for row in rows:
+            values = []
+
+            for value in row:
+                if value is None:
+                    values.append("NULL")
+                else:
+                    values.append(str(value))
+
+            print(" | ".join(values))
+
+    print()
+
+def display_employee_tables(cursor):
+        """
+        Displays the employee-related tables.
+        """
+
+        display_table(cursor, "department", "DEPARTMENT TABLE")
+        display_table(cursor, "employee", "EMPLOYEE TABLE")
+        display_table(cursor, "employee_time", "EMPLOYEE TIME TABLE")
 
 
 def main():
@@ -55,19 +96,17 @@ def main():
         connection = create_database_connection()
         cursor = connection.cursor()
 
-        # This test query confirms that Python is connected
-        # to the correct MySQL database.
         cursor.execute("SELECT DATABASE();")
         selected_database = cursor.fetchone()
 
         if selected_database:
             print(f"Current database: {selected_database[0]}")
 
-        # The table-display functions created by the team
-        # will be called from this section later.
+        # Display the employee-related tables
+        display_employee_tables(cursor)
 
     except Error as error:
-        print("\nUnable to connect to the MySQL database.")
+        print(f"\nUnable to connect to the MySQL database.")
         print(f"MySQL error: {error}")
 
     finally:
