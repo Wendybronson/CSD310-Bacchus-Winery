@@ -1,0 +1,9 @@
+# Local database credentials
+db_config.py
+
+# PyCharm files
+.idea/
+
+# Python-generated files
+__pycache__/
+*.pyc
