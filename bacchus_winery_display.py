@@ -6,7 +6,7 @@
 # Luis Cortez
 # Martha Guzman
 #
-# July 2026
+# July 19th, 2026
 # Database Development and Use
 # Module 9.1 Milestone #2
 # Case Study: Bacchus Winery
