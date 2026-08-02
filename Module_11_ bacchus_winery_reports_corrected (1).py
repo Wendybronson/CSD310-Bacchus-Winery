@@ -121,81 +121,72 @@ def display_table(cursor, query, display_title):
 
 def supplier_delivery_monthly_report(cursor):
     """
-    Displays monthly supplier delivery totals and the
-    average number of days deliveries were early or late.
+    Displays monthly supplier delivery totals, completed
+    and pending deliveries, and the average number of days
+    completed deliveries were early or late.
     """
 
     query = """
-            SELECT 
-                s.supplier_name,
-                MONTH (sd.expected_delivery_date)
-                    AS delivery_month_number, 
-                MONTHNAME(sd.expected_delivery_date)
-                    AS delivery_month, 
-                COUNT(sd.delivery_id) 
-                    AS total_deliveries,
-                ROUND(
-                    AVG(
-                        DATEDIFF(
-                            sd.actual_delivery_date,
-                            sd.expected_delivery_date
-                        )
-                    ),
-                    2
-                ) AS average_days_difference, 
+        SELECT
+            s.supplier_name,
+            YEAR(sd.expected_delivery_date)
+                AS delivery_year,
+            MONTH(sd.expected_delivery_date)
+                AS delivery_month_number,
+            MONTHNAME(sd.expected_delivery_date)
+                AS delivery_month,
+            COUNT(sd.delivery_id)
+                AS total_deliveries,
+            SUM(
+                CASE
+                    WHEN sd.actual_delivery_date IS NOT NULL
+                        THEN 1
+                    ELSE 0
+                END
+            ) AS completed_deliveries,
+            SUM(
                 CASE
                     WHEN sd.actual_delivery_date IS NULL
-                        THEN 'Pending' 
-                    WHEN DATEDIFF(
-                        sd.actual_delivery_date, 
+                        THEN 1
+                    ELSE 0
+                END
+            ) AS pending_deliveries,
+            ROUND(
+                AVG(
+                    DATEDIFF(
+                        sd.actual_delivery_date,
                         sd.expected_delivery_date
-                    ) < 0
-                        THEN 'Early' 
-                    WHEN DATEDIFF(
-                        sd.actual_delivery_date, 
-                        sd.expected_delivery_date
-                    ) = 0
-                        THEN 'On Time' 
-                    ELSE 'Late'
-            END AS delivery_status
-
+                    )
+                ),
+                2
+            ) AS average_days_difference
         FROM supplier AS s
-
         INNER JOIN supplier_delivery AS sd
             ON s.supplier_id = sd.supplier_id
-
         GROUP BY
+            s.supplier_id,
             s.supplier_name,
+            YEAR(sd.expected_delivery_date),
             MONTH(sd.expected_delivery_date),
-            MONTHNAME(sd.expected_delivery_date),
-            sd.actual_delivery_date,
-            sd.expected_delivery_date
-
+            MONTHNAME(sd.expected_delivery_date)
         ORDER BY
-            MONTH(sd.expected_delivery_date),
-            average_days_difference DESC;
-"""
-
-    print("\nDelivery Status Key")
-    print("-------------------")
-    print("Early   = Delivered before the expected delivery date")
-    print("On Time = Delivered on the expected delivery date")
-    print("Late    = Delivered after the expected delivery date")
-    print("Pending = Actual delivery date has not been recorded")
+            delivery_year,
+            delivery_month_number,
+            s.supplier_name;
+    """
 
     print("\nAverage Days Difference")
     print("-----------------------")
-    print("Negative value = Delivery arrived early")
-    print("0              = Delivery arrived on time")
-    print("Positive value = Delivery arrived late")
-    print("NULL           = Delivery is still pending\n")
+    print("Negative value = Deliveries averaged early")
+    print("0              = Deliveries averaged on time")
+    print("Positive value = Deliveries averaged late")
+    print("NULL           = No completed deliveries for that month\n")
 
     display_table(
         cursor,
         query,
         "REPORT 1 - MONTHLY SUPPLIER DELIVERY PERFORMANCE"
     )
-
 
 # =========================================================
 # Report 2 - Wine Sales by Distributor
